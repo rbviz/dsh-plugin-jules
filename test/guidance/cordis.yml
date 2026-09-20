@@ -1,0 +1,24 @@
+# The prompt half of the restart note, assembled for real.
+#
+# The journal fixture proves a watch is recorded; this one proves the record
+# reaches the model guidance. The record is seeded on disk before boot, which is
+# exactly the state a restarted harness loads — so the note can be verified
+# without actually restarting anything.
+- name: '@deepseek-ai/dsh-system-prompt'
+
+- name: '@deepseek-ai/dsh-tools'
+
+- name: '@deepseek-ai/dsh-storage'
+
+- name: '@deepseek-ai/dsh-storage-json'
+  config:
+    root: ./.storage-guidance
+
+- name: '@deepseek-ai/dsh-storage-domain'
+  config:
+    backend: json
+
+- name: '../../lib/index.js'
+  config:
+    apiKey: guidance-test-key
+    baseURL: https://jules.test/v1alpha

@@ -1,0 +1,16 @@
+# Real-composition fixture: the plugin is loaded through the Cordis loader
+# beside the genuine system-prompt and tools services, exactly as a profile
+# mounts it. Nothing here is stubbed except the credential.
+- name: '@deepseek-ai/dsh-system-prompt'
+
+- name: '@deepseek-ai/dsh-tools'
+
+# The background job registry, so jules_watch registers and its jobs settle.
+- name: '@deepseek-ai/dsh-jobs-local'
+
+- name: '../../lib/index.js'
+  config:
+    apiKey: composition-test-key
+    baseURL: https://jules.test/v1alpha
+    pollIntervalMs: 250
+    retryMaxAttempts: 2

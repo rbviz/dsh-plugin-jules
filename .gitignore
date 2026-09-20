@@ -1,0 +1,17 @@
+# Build output: regenerate with "npm run build".
+lib/
+
+# Local dependency links created by scripts/link-dsh-deps.mjs.
+node_modules/
+
+# npm cache, redirected here when the default home cache is not writable.
+.npm-cache/
+
+# Scratch directories used while verifying the plugin.
+.dsh-test/
+.probe/
+
+# Storage the journal and guidance tests write through the real json backend.
+.storage/
+.storage-journal/
+.storage-guidance/

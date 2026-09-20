@@ -1,0 +1,14 @@
+# Real-composition fixture for the durable half of watching: the same storage
+# stack the base bundle mounts, so the journal opens over a genuine domain
+# instead of degrading to undefined. Reading ctx.storageDomain eagerly used to
+# race the service's activation and disable the journal silently, which is the
+# failure this fixture exists to catch.
+- name: '@deepseek-ai/dsh-storage'
+
+- name: '@deepseek-ai/dsh-storage-json'
+  config:
+    root: ./.storage
+
+- name: '@deepseek-ai/dsh-storage-domain'
+  config:
+    backend: json

@@ -1,0 +1,37 @@
+# dsh-plugin-jules — the bundle layer for the Google Jules integration.
+#
+# One Loader row registers the whole plugin: the `jules` tool family plus the
+# model guidance section. Nothing here is app-specific, so the row is the same
+# for every profile that installs this bundle.
+#
+# This row OWNS the id `jules`. A profile that installs this bundle must not
+# also insert a row with that id from its own cordis.patch.yml: two insert
+# patches for one id fail the boot with "duplicate loader entry id: jules".
+# To change a value, override this row by id instead of inserting a new one —
+# and because a patch replaces the whole config object rather than merging into
+# it, restate every key you still want.
+- insert:
+    - id: jules
+      name: 'dsh-plugin-jules'
+      config:
+        apiKeyEnv: JULES_API_KEY
+        baseURL: https://jules.googleapis.com/v1alpha
+        requestTimeoutMs: 30000
+        defaultPageSize: 30
+        maxPageSize: 100
+        maxPatchBytes: 200000
+        waitDefaultMs: 120000
+        waitMaxMs: 300000
+        pollIntervalMs: 5000
+        maxActivityPages: 10
+        retryMaxAttempts: 4
+        retryBaseDelayMs: 1000
+        retryMaxDelayMs: 30000
+        # jules_watch: background watching through the job registry.
+        enableWatch: true
+        watchDefaultMs: 1800000
+        watchMaxMs: 7200000
+        watchPollIntervalMs: 15000
+        # Jules does not reliably move the session state when it hands work
+        # back, so the watcher also settles on what the activity log says.
+        watchSettleOnMessage: true

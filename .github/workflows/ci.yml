@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22 is the floor declared in engines; 26 is current. CI is the only
+        # place that claim is actually tested.
+        node: ['22', '26']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      # --ignore-scripts because prepare links against a harness home that a
+      # runner does not have. Every peer is also a devDependency, so a clean
+      # checkout builds and tests from node_modules alone.
+      - name: Install
+        run: npm ci --ignore-scripts
+
+      - name: Build
+        run: npm run build
+
+      # The suite includes real-composition tests: they mount the built plugin
+      # through the Cordis loader beside the genuine harness services these
+      # dependencies provide. A green run means the tools registered and
+      # executed through the real pipeline, not merely that the types lined up.
+      - name: Test
+        run: npm test
+
+      # A registry install never runs a build, so a tarball without lib/ would
+      # install cleanly and then fail to load. This is the check that catches it.
+      - name: Pack sanity check
+        run: |
+          npm pack --dry-run --json > pack.json
+          node -e "
+            const report = require('./pack.json')[0];
+            const files = report.files.map(entry => entry.path);
+            const required = ['lib/index.js', 'lib/tools.js', 'cordis.patch.yml', 'package.json', 'LICENSE'];
+            const missing = required.filter(name => !files.includes(name));
+            if (missing.length > 0) {
+              console.error('missing from the tarball: ' + missing.join(', '));
+              process.exit(1);
+            }
+            console.log('tarball: ' + files.length + ' files, ' + report.size + ' bytes packed');
+          "
+
+  # Publishing is deliberately not automated here. It needs a release decision
+  # and an NPM_TOKEN secret; until then it stays a deliberate local command,
+  # which also keeps npm provenance out of the picture.
