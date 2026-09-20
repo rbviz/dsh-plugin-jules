@@ -1,6 +1,7 @@
 # dsh-plugin-jules
 
 [![CI](https://github.com/rbviz/dsh-plugin-jules/actions/workflows/ci.yml/badge.svg)](https://github.com/rbviz/dsh-plugin-jules/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/dsh-plugin-jules.svg)](https://www.npmjs.com/package/dsh-plugin-jules)
 
 Google [Jules](https://jules.google.com) as a [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) capability.
 
@@ -33,8 +34,38 @@ It talks to the documented Jules v1alpha REST API directly and has **no runtime 
 
 ## Install
 
-The package declares `dsh.bundle`, so it installs as an ordinary profile bundle. From a checkout of
-this repository:
+The package declares `dsh.bundle`, so it installs as an ordinary profile bundle. `dsh plugin`
+forwards its arguments to pnpm in the profile directory, so `add`, `update`, and `remove` are the
+ordinary verbs. If the profile does not exist yet, the first command creates it.
+
+### From npm
+
+```sh
+dsh plugin --profile <your-profile> add dsh-plugin-jules
+```
+
+Nothing compiles on your machine: `lib/` ships prebuilt, so there is no `prepare` script and no
+`allowBuilds` permission to grant. The `@deepseek-ai/*` peer dependencies come from the harness
+installation's own module fallback, so there is nothing else to install — this plugin adds no
+runtime dependencies of its own.
+
+**Restart the harness.** A running process keeps the bundle set it started with; an `add`, `update`,
+or `remove` is picked up at the next start. Then confirm the layer composed:
+
+```sh
+dsh --profile <your-profile> --dump-config | grep -A 3 'id: jules'
+```
+
+Upgrading and removing are the same passthrough, each followed by the same restart:
+
+```sh
+dsh plugin --profile <your-profile> update dsh-plugin-jules
+dsh plugin --profile <your-profile> remove dsh-plugin-jules
+```
+
+### From a checkout
+
+To run your own build of the sources:
 
 ```sh
 node scripts/link-dsh-deps.mjs   # once, and after changing peerDependencies
@@ -43,11 +74,8 @@ npm run build                    # compiles src/ to lib/
 dsh plugin --profile <your-profile> add /path/to/jules-plugin
 ```
 
-Then restart the harness. Confirm the layer composed:
-
-```sh
-dsh --profile <your-profile> --dump-config | grep -A 3 'id: jules'
-```
+The path spec is anchored to the directory you invoke from, so `add .` works from the checkout root.
+Restart, then confirm as above.
 
 ### From GitHub
 
