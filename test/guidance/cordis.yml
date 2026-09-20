@@ -8,6 +8,11 @@
 
 - name: '@deepseek-ai/dsh-tools'
 
+# The background job registry, so jules_watch registers and the guidance
+# assembles the variant a real composition produces. Without it the section
+# correctly falls back to the no-watch wording, which is a different product.
+- name: '@deepseek-ai/dsh-jobs-local'
+
 - name: '@deepseek-ai/dsh-storage'
 
 - name: '@deepseek-ai/dsh-storage-json'

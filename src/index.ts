@@ -150,23 +150,39 @@ export const Config: z<Config> = z.object({
   retryMaxDelayMs: z.number().step(1).min(1).default(DEFAULT_RETRY_MAX_DELAY_MS),
 })
 
-/** Model guidance placed beside the subagent instructions. */
-export const JULES_PROMPT =
-  'Jules is a remote coding agent reachable through the jules_* tools. It runs asynchronously in the cloud on its own clone of a '
-  + 'repository, so a session keeps working after your turn ends. '
-  + 'DO NOT POLL. jules_create starts a session and returns its id; jules_watch registers a background watch and returns a job id; '
-  + 'then END YOUR TURN and get on with something else. The watch notice wakes you when the session finishes, fails, needs a plan '
-  + 'decision, or posts a message, and job_output reads what happened. Nothing needs checking in between — waiting is the watcher\'s '
-  + 'job, not yours, and a status call that returns what you already saw has cost a turn and bought nothing. '
-  + 'jules_wait is the same wait held open in the foreground; use it only when you genuinely have nothing else to do. '
-  + 'jules_status is for confirming an action you just took, following up a notice, or answering the user when they ask about a '
-  + 'session — never for waiting. '
-  + 'The rest: jules_sources lists the repositories Jules may work in; jules_activities reads the event log, for diagnosing a stall '
-  + 'rather than polling; jules_approve_plan releases a plan you have reviewed; jules_send_message answers or corrects the agent; '
-  + 'jules_patch returns the unified diff, in slices when it is large. '
-  + 'Ask for requirePlanApproval when a task will change existing code, then review the plan before approving it. '
-  + 'Prefer finishing small work here; delegate a task that is long, independent, or better done in a clean checkout, and do not '
-  + 'open several sessions for one task because the service throttles concurrent creation.'
+/**
+ * Model guidance for the Jules tool family.
+ *
+ * Written as an instruction and scoped to policy, like every in-box tool
+ * section: what each tool does is the tool description's job, so this says when
+ * to reach for the family and what not to do with it. The earlier draft opened
+ * by describing Jules instead, and spent most of its length restating the tool
+ * descriptions.
+ *
+ * The waiting half is conditional because `enableWatch: false` removes
+ * `jules_watch` from the composition entirely, and guidance naming a tool the
+ * model cannot call is worse than guidance that says less. `tool:web_search`
+ * sets the same precedent for its optional `web_fetch` companion.
+ * @param watchAvailable - whether `jules_watch` is registered in this scope.
+ * @returns the section text.
+ */
+export function julesGuidance(watchAvailable: boolean): string {
+  const waiting = watchAvailable
+    ? 'jules_watch registers a background watch and returns a job id; then END YOUR TURN, and the harness wakes you with a notice when '
+      + 'the session finishes, fails, needs a plan decision, or posts a message. DO NOT POLL: a status call that returns what you '
+      + 'already saw has cost a turn and bought nothing. jules_wait holds that same wait open in the foreground, so reach for it only '
+      + 'when nothing else can proceed meanwhile.'
+    : 'jules_wait holds the turn open until the session finishes, fails, needs a plan decision, or posts a message. DO NOT POLL: a '
+      + 'status call that returns what you already saw has cost a turn and bought nothing.'
+  return 'Use the jules_* tools to delegate a coding task to Jules, a remote agent that works asynchronously in the cloud on its own '
+    + 'clone of a repository, so the session keeps working after your turn ends. jules_create returns a session id immediately. '
+    + waiting + ' '
+    + 'jules_status is for confirming an action you just took, following up a watch notice, or answering the user about a session — '
+    + 'never for waiting. '
+    + 'Ask for requirePlanApproval when a task will change existing code, then read the plan before jules_approve_plan releases it. '
+    + 'Prefer finishing small work here; delegate a task that is long, independent, or better done in a clean checkout, and do not '
+    + 'open several sessions for one task because the service throttles concurrent creation.'
+}
 
 /**
  * Complete every optional field and reject combinations the schema cannot express.
@@ -301,10 +317,23 @@ export function apply(ctx: Context, config: Config): void {
     // positions owned by particular tool families, and Jules is the same kind of
     // thing a subagent is — a delegation target — so its guidance belongs beside
     // those instructions rather than in an unrelated slot. Equal orders fall back
-    // to name order, which is stable.
+    // to name order, which is stable. The system-prompt README documents the
+    // alternative for out-of-tree packages — "external contributions may use any
+    // finite order" — but a borrowed allocated position cannot collide with a
+    // future in-box slot, while a hand-picked number can.
     order: ctx.systemPrompt.getSectionOrder('TOOL_SUBAGENT'),
     // Evaluated per assembly, so the orphan note appears the moment the plugin
     // loads after a restart and disappears as watches are re-armed.
-    text: () => JULES_PROMPT + orphanNote((journal?.pending() ?? []).filter(record => !live.has(record.session))),
+    //
+    // Empty text is dropped before rendering, so an agent whose scope excludes
+    // the family is never told about tools it cannot call — the same gate
+    // `tool:read` and `tool:subagent` apply. `jules_create` stands in for the
+    // family: it registers unconditionally and is the entry point this guidance
+    // is about. Gating ahead of the note also stops an agent without Jules tools
+    // from being handed a list of watches to re-arm.
+    text: ({ scope }) => ctx.tools.get('jules_create', scope) === undefined
+      ? ''
+      : julesGuidance(ctx.tools.get('jules_watch', scope) !== undefined)
+        + orphanNote((journal?.pending() ?? []).filter(record => !live.has(record.session))),
   })
 }

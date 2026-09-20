@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-jules",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Google Jules remote coding agent integration for DeepSeek Harness",
   "keywords": [
     "dsh",

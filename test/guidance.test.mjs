@@ -13,6 +13,7 @@ import { after, before, test } from 'node:test'
 import { Context } from '@deepseek-ai/cordis'
 import Loader from '@deepseek-ai/cordis-plugin-loader'
 import { pathToFileURL } from 'node:url'
+import { julesGuidance } from '../lib/index.js'
 
 /** Where this fixture's storage backend roots, mirroring the cordis.yml entry. */
 const STORAGE_ROOT = new URL('../.storage-guidance/', import.meta.url).pathname
@@ -53,7 +54,7 @@ before(async () => {
     if (open && ctx.get('systemPrompt') !== undefined) {
       const assembly = await ctx.systemPrompt.assemble()
       prompt = JSON.stringify(assembly)
-      if (prompt.includes('Jules is a remote coding agent')) break
+      if (prompt.includes('Use the jules_* tools')) break
     }
     await new Promise(resolve => setTimeout(resolve, 10))
   }
@@ -64,7 +65,25 @@ after(async () => {
 })
 
 test('the guidance is assembled at all', () => {
-  assert.match(prompt, /Jules is a remote coding agent/, 'the jules section never reached the prompt')
+  assert.match(prompt, /Use the jules_\* tools/, 'the jules section never reached the prompt')
+})
+
+test('the guidance reads as an instruction, not a description', () => {
+  for (const text of [julesGuidance(true), julesGuidance(false)]) {
+    assert.match(text, /^Use the jules_\* tools to delegate/, 'the section must open in the imperative voice')
+    assert.match(text, /DO NOT POLL/, 'the anti-polling rule is the reason this section exists')
+  }
+})
+
+test('the watch half names jules_watch only when it is registered', () => {
+  // The fixture leaves enableWatch at its default, so the assembled prompt is
+  // the variant a watcher-enabled composition produces.
+  assert.match(prompt, /jules_watch registers a background watch/)
+  assert.match(julesGuidance(true), /jules_watch registers a background watch/)
+  // With enableWatch false the tool is absent, and guidance that names it would
+  // send the model after something it cannot call.
+  assert.doesNotMatch(julesGuidance(false), /jules_watch/, 'guidance named a tool the composition does not register')
+  assert.match(julesGuidance(false), /jules_wait holds the turn open until/, 'the no-watch variant must still say how to wait')
 })
 
 test('a watch that outlived the harness is named in the guidance', () => {
