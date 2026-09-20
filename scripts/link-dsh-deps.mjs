@@ -22,7 +22,9 @@
  * `--check` reports what is missing without writing anything.
  */
 
-import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync, symlinkSync, unlinkSync } from 'node:fs'
+import {
+  existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, readlinkSync, rmSync, symlinkSync, unlinkSync,
+} from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -33,10 +35,10 @@ const MANIFEST = JSON.parse(readFileSync(join(PACKAGE_ROOT, 'package.json'), 'ut
  * Every name to link: runtime peers plus the loader packages the composition
  * test boots. Types alone still need resolution, so this is not filtered.
  */
-const REQUIRED = [
+const REQUIRED = [...new Set([
   ...Object.keys(MANIFEST.peerDependencies ?? {}),
   ...Object.keys(MANIFEST.devDependencies ?? {}),
-]
+])]
 
 function parseArgs(argv) {
   const options = { home: process.env.DSH_HOME, check: false, optional: false }
@@ -52,7 +54,7 @@ function parseArgs(argv) {
     }
   }
   if (options.home === undefined || options.home.length === 0) options.home = join(homedir(), '.dsh')
-  return { home: resolve(options.home), check: options.check }
+  return { home: resolve(options.home), check: options.check, optional: options.optional }
 }
 
 function homedir() {
@@ -102,7 +104,12 @@ for (const packageName of REQUIRED) {
     continue
   }
   mkdirSync(dirname(link), { recursive: true })
-  try { if (lstatSync(link)) unlinkSync(link) } catch { /* absent */ }
+  // rmSync, not unlinkSync: these peers are devDependencies too, so npm may have
+  // installed them as real directories. unlinkSync on one throws EISDIR, and
+  // swallowing that left the symlink to fail with EEXIST against a directory
+  // that was still there — which is exactly how this broke the first time a
+  // checkout had both an npm install and a local harness.
+  rmSync(link, { recursive: true, force: true })
   symlinkSync(resolve(source), link, 'junction')
   process.stdout.write(`linked ${packageName} -> ${source}\n`)
 }

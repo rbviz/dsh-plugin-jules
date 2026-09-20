@@ -187,7 +187,18 @@ test('a request that outlives its deadline raises a timeout', async () => {
     }),
     { requestTimeoutMs: 25 },
   )
-  await assert.rejects(() => client.getSession('1'), JulesTimeoutError)
+  // AbortSignal.timeout's timer is unref'd by design, so it does not hold the
+  // event loop open. With a stubbed transport that never settles, nothing else
+  // does either — on a runner that lets the loop drain, the deadline simply
+  // never fires and the test hangs rather than asserting. Node 26 tolerates that
+  // by cancelling the file; Node 22 reported it. Hold the loop open for the
+  // window under test, which is the condition the harness itself always meets.
+  const keepAlive = setTimeout(() => {}, 5_000)
+  try {
+    await assert.rejects(() => client.getSession('1'), JulesTimeoutError)
+  } finally {
+    clearTimeout(keepAlive)
+  }
 })
 
 test('a transport failure becomes a network error', async () => {

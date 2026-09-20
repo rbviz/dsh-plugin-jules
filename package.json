@@ -47,7 +47,7 @@
     "typecheck": "node scripts/build.mjs --noEmit",
     "link-dsh-deps": "node scripts/link-dsh-deps.mjs",
     "prepare": "node scripts/link-dsh-deps.mjs --optional && node scripts/build.mjs",
-    "test": "node scripts/build.mjs && node --test test/"
+    "test": "node scripts/build.mjs && node --test test/*.test.mjs"
   },
   "dsh": {
     "bundle": {

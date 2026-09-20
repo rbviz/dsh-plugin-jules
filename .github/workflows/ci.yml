@@ -23,9 +23,9 @@ jobs:
         # place that claim is actually tested.
         node: ['22', '26']
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
           cache: npm
@@ -48,20 +48,34 @@ jobs:
 
       # A registry install never runs a build, so a tarball without lib/ would
       # install cleanly and then fail to load. This is the check that catches it.
+      #
+      # It reads a real tarball with tar rather than parsing npm's --json report:
+      # that report's shape is not a stable interface across npm majors, and a
+      # parser that silently reads no files reports a missing lib/ that is
+      # actually there. It also prints the contents, so a failure here explains
+      # itself without needing anyone to read the log.
       - name: Pack sanity check
         run: |
-          npm pack --dry-run --json > pack.json
-          node -e "
-            const report = require('./pack.json')[0];
-            const files = report.files.map(entry => entry.path);
-            const required = ['lib/index.js', 'lib/tools.js', 'cordis.patch.yml', 'package.json', 'LICENSE'];
-            const missing = required.filter(name => !files.includes(name));
-            if (missing.length > 0) {
-              console.error('missing from the tarball: ' + missing.join(', '));
-              process.exit(1);
-            }
-            console.log('tarball: ' + files.length + ' files, ' + report.size + ' bytes packed');
-          "
+          if ! npm pack --pack-destination "${{ runner.temp }}" > "${{ runner.temp }}/pack.out" 2>&1; then
+            echo "::error::npm pack failed"
+            cat "${{ runner.temp }}/pack.out"
+            exit 1
+          fi
+          tarball=$(find "${{ runner.temp }}" -maxdepth 1 -name '*.tgz' | head -1)
+          echo "packed: $tarball"
+          tar -tzf "$tarball" | sed 's|^package/||' | sort > "${{ runner.temp }}/contents.txt"
+          echo "tarball contents ($(wc -l < "${{ runner.temp }}/contents.txt") entries):"
+          cat "${{ runner.temp }}/contents.txt"
+
+          status=0
+          for required in lib/index.js lib/tools.js cordis.patch.yml package.json LICENSE; do
+            if ! grep -qx "$required" "${{ runner.temp }}/contents.txt"; then
+              echo "::error::$required is missing from the tarball"
+              status=1
+            fi
+          done
+          [ "$status" -eq 0 ] || exit 1
+          echo "ok: every required file is in the tarball"
 
   # Publishing is deliberately not automated here. It needs a release decision
   # and an NPM_TOKEN secret; until then it stays a deliberate local command,
