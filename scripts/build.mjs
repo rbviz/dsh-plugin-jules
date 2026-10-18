@@ -5,7 +5,7 @@
  *
  * Resolution order: `$DSH_TSC`, then a `typescript` found through this
  * package's own `node_modules` (populated by `link-dsh-deps`), then the
- * harness home. Run `npm run link-dsh-deps` first if this fails.
+ * harness home. Run `pnpm run link-dsh-deps` first if this fails.
  */
 
 import { spawnSync } from 'node:child_process'
@@ -26,7 +26,7 @@ function candidateTsc() {
 
 const tsc = candidateTsc()
 if (tsc === undefined) {
-  process.stderr.write('build: no typescript found; run "npm run link-dsh-deps" or set DSH_TSC\n')
+  process.stderr.write('build: no typescript found; run "pnpm run link-dsh-deps" or set DSH_TSC\n')
   process.exit(1)
 }
 

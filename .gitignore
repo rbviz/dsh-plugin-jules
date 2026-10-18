@@ -1,10 +1,10 @@
-# Build output: regenerate with "npm run build".
+# Build output: regenerate with "pnpm run build".
 lib/
 
 # Local dependency links created by scripts/link-dsh-deps.mjs.
 node_modules/
 
-# npm cache, redirected here when the default home cache is not writable.
+# Package-manager cache, redirected here when the default home cache is not writable.
 .npm-cache/
 
 # Scratch directories used while verifying the plugin.

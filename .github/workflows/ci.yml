@@ -25,39 +25,43 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The version comes from package.json's packageManager field, so the
+      # runner uses the same pnpm a local checkout does.
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node }}
-          cache: npm
+          cache: pnpm
 
       # --ignore-scripts because prepare links against a harness home that a
       # runner does not have. Every peer is also a devDependency, so a clean
       # checkout builds and tests from node_modules alone.
       - name: Install
-        run: npm ci --ignore-scripts
+        run: pnpm install --frozen-lockfile --ignore-scripts
 
       - name: Build
-        run: npm run build
+        run: pnpm run build
 
       # The suite includes real-composition tests: they mount the built plugin
       # through the Cordis loader beside the genuine harness services these
       # dependencies provide. A green run means the tools registered and
       # executed through the real pipeline, not merely that the types lined up.
       - name: Test
-        run: npm test
+        run: pnpm test
 
       # A registry install never runs a build, so a tarball without lib/ would
       # install cleanly and then fail to load. This is the check that catches it.
       #
-      # It reads a real tarball with tar rather than parsing npm's --json report:
-      # that report's shape is not a stable interface across npm majors, and a
-      # parser that silently reads no files reports a missing lib/ that is
-      # actually there. It also prints the contents, so a failure here explains
+      # It reads a real tarball with tar rather than parsing the pack command's
+      # --json report: that report's shape is not a stable interface across
+      # package-manager majors, and a parser that silently reads no files
+      # reports a missing lib/ that is actually there. It also prints the contents, so a failure here explains
       # itself without needing anyone to read the log.
       - name: Pack sanity check
         run: |
-          if ! npm pack --pack-destination "${{ runner.temp }}" > "${{ runner.temp }}/pack.out" 2>&1; then
-            echo "::error::npm pack failed"
+          if ! pnpm pack --pack-destination "${{ runner.temp }}" > "${{ runner.temp }}/pack.out" 2>&1; then
+            echo "::error::pnpm pack failed"
             cat "${{ runner.temp }}/pack.out"
             exit 1
           fi

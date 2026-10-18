@@ -104,11 +104,11 @@ for (const packageName of REQUIRED) {
     continue
   }
   mkdirSync(dirname(link), { recursive: true })
-  // rmSync, not unlinkSync: these peers are devDependencies too, so npm may have
-  // installed them as real directories. unlinkSync on one throws EISDIR, and
-  // swallowing that left the symlink to fail with EEXIST against a directory
-  // that was still there — which is exactly how this broke the first time a
-  // checkout had both an npm install and a local harness.
+  // rmSync, not unlinkSync: these peers are devDependencies too, so a package
+  // manager may have installed them as real directories. unlinkSync on one
+  // throws EISDIR, and swallowing that left the symlink to fail with EEXIST
+  // against a directory that was still there — which is exactly how this broke
+  // the first time a checkout had both an install and a local harness.
   rmSync(link, { recursive: true, force: true })
   symlinkSync(resolve(source), link, 'junction')
   process.stdout.write(`linked ${packageName} -> ${source}\n`)

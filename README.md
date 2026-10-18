@@ -76,7 +76,7 @@ To run your own build of the sources:
 
 ```sh
 node scripts/link-dsh-deps.mjs   # once, and after changing peerDependencies
-npm run build                    # compiles src/ to lib/
+pnpm run build                   # compiles src/ to lib/
 
 dsh plugin --profile <your-profile> add /path/to/jules-plugin
 ```
@@ -326,14 +326,15 @@ installation already uses, so both sides share one module instance.
 ## Development
 
 ```sh
+pnpm install                     # resolves devDependencies from pnpm-lock.yaml
 node scripts/link-dsh-deps.mjs   # once, or after changing peerDependencies
-npm run build                    # tsc, using the TypeScript the harness already ships
-npm test                         # build, then the full suite
+pnpm run build                   # tsc, using the TypeScript the harness already ships
+pnpm test                        # build, then the full suite
 node scripts/link-dsh-deps.mjs --check   # report missing peers, change nothing
 ```
 
 `scripts/build.mjs` resolves TypeScript from `$DSH_TSC`, then the linked `node_modules`, then
-`$DSH_HOME`, so the plugin needs no toolchain of its own and never runs `pnpm install`.
+`$DSH_HOME`, so the plugin needs no toolchain of its own and never shells out to a package manager.
 
 Tests run in two layers. Unit tests cover normalization, request construction, retry and error
 classification against a stubbed transport, projections, and renders. Real-composition tests mount the
