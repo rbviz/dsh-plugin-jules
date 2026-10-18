@@ -12,6 +12,8 @@ long-running work, follow it, approve its plan, answer it, and pull back the dif
 
 It talks to the documented Jules v1alpha REST API directly and has **no runtime dependencies**.
 
+Which harness each release supports, and what changed: [CHANGELOG.md](CHANGELOG.md).
+
 ## What it gives you
 
 - **Delegation that outlives a turn.** `jules_create` returns a session id immediately; the work
