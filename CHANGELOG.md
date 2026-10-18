@@ -8,6 +8,8 @@ A plugin runs inside a host it does not own, so each release states the DeepSeek
 supports. The same requirement is enforced at load time through `engines.dsh`: a harness outside the
 range refuses the bundle instead of running it against an API it no longer matches.
 
+## [Unreleased]
+
 ## [0.2.0] - 2026-10-19
 
 Requires DeepSeek Harness **0.2.1-rc.2 or newer, within 0.2.x**.
@@ -30,6 +32,8 @@ Requires DeepSeek Harness **0.2.1-rc.2 or newer, within 0.2.x**.
 
 ## [0.1.1] - 2026-09-20
 
+Requires DeepSeek Harness **0.1.x**, from 0.1.5-rc.2 onward.
+
 ### Added
 
 - README install instructions for npm, leading the section, with the checkout and GitHub paths
@@ -49,6 +53,8 @@ Requires DeepSeek Harness **0.2.1-rc.2 or newer, within 0.2.x**.
 
 ## [0.1.0] - 2026-09-20
 
+Requires DeepSeek Harness **0.1.x**, from 0.1.5-rc.2 onward.
+
 ### Added
 
 - Ten `jules_*` tools: `jules_sources`, `jules_create`, `jules_list`, `jules_status`,
@@ -62,3 +68,8 @@ Requires DeepSeek Harness **0.2.1-rc.2 or newer, within 0.2.x**.
   themselves cannot be restored.
 - Plan approval confirmed by its event rather than by the phase the service returns with.
 - A model-guidance section that leads with create, watch, end your turn.
+
+[Unreleased]: https://github.com/rbviz/dsh-plugin-jules/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/rbviz/dsh-plugin-jules/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/rbviz/dsh-plugin-jules/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/rbviz/dsh-plugin-jules/releases/tag/v0.1.0
