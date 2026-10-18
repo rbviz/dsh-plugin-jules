@@ -425,7 +425,7 @@ function startWatchJob(
       const outcome = await runWatch(client, session, targets, budgetMs, config, controller.signal)
       // The watch itself succeeded. A failed or waiting *session* is reported in
       // the detail and the report, not as a broken job.
-      settle({ status: 'completed', detail: outcome.detail, output: outcome.report })
+      settle({ status: 'completed', detail: outcome.detail, result: outcome.report })
       // It reached its own conclusion, so the journal has nothing left to
       // report. A kill or a teardown deliberately does NOT release: a teardown
       // is precisely the restart this journal exists to survive.
@@ -443,7 +443,10 @@ function startWatchJob(
   const jobId = ctx.jobs.start({
     kind: 'jules',
     label: `session ${session}`,
-    owner,
+    // 0.2.1 narrowed a job's owner from the Agent to its SessionId. The Agent is
+    // still what receives the completion notice, so its live session id is the
+    // identity the registry records and fences collection by.
+    owner: owner.session.id,
     run: (): JobHooks => {
       void watch()
       return {

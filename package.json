@@ -1,6 +1,6 @@
 {
   "name": "dsh-plugin-jules",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Google Jules remote coding agent integration for DeepSeek Harness",
   "keywords": [
     "dsh",
@@ -24,7 +24,8 @@
     "url": "https://github.com/rbviz/dsh-plugin-jules/issues"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "dsh": "^0.2.1-rc.2"
   },
   "type": "module",
   "main": "lib/index.js",
@@ -56,32 +57,32 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-agent": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-credentials": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-jobs": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-launch-environment": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-storage-domain": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-tools": "^0.1.5-rc.2",
+    "@deepseek-ai/dsh-agent": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-credentials": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-jobs": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-launch-environment": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-storage-domain": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-tools": "^0.2.1-rc.2",
     "@deepseek-ai/schemastery": "^3.18.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "^4.0.2",
-    "@deepseek-ai/dsh-agent": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-credentials": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-jobs": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-launch-environment": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-storage-domain": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-system-prompt": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-tools": "^0.1.5-rc.2",
+    "@deepseek-ai/dsh-agent": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-credentials": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-jobs": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-launch-environment": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-storage-domain": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-system-prompt": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-tools": "^0.2.1-rc.2",
     "@deepseek-ai/schemastery": "^3.18.2",
     "zod": "^4.4.3",
     "@deepseek-ai/cordis-plugin-include": "^1.0.7",
     "@deepseek-ai/cordis-plugin-loader": "^1.0.3",
-    "@deepseek-ai/dsh-jobs-local": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-storage": "^0.1.5-rc.2",
-    "@deepseek-ai/dsh-storage-json": "^0.1.5-rc.2",
+    "@deepseek-ai/dsh-jobs-local": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-storage": "^0.2.1-rc.2",
+    "@deepseek-ai/dsh-storage-json": "^0.2.1-rc.2",
     "typescript": "^6.0.3"
   }
 }

@@ -25,12 +25,17 @@ It talks to the documented Jules v1alpha REST API directly and has **no runtime 
 
 ## Requirements
 
-- DeepSeek Harness, with a base-backed profile (the base bundle provides `tools`, `systemPrompt`,
-  `jobs`, and the storage stack this plugin uses).
+- DeepSeek Harness **0.2.1-rc.2 or newer, within 0.2.x**, with a base-backed profile (the base bundle
+  provides `tools`, `systemPrompt`, `jobs`, and the storage stack this plugin uses). The requirement
+  is declared in `engines.dsh`: a harness that does not meet it refuses to load the bundle and says
+  so at startup, instead of running it against an API it no longer matches.
 - Node 22 or newer.
 - A Jules account with at least one repository connected through the Jules GitHub App.
 - A Jules API key: **https://jules.google.com/settings**. Jules allows three keys per account and
   shows each one once.
+
+This version targets the 0.2.x harness. If you are still on 0.1.x, stay on `dsh-plugin-jules@0.1.x`
+— the 0.2.x line of this plugin moved to the 0.2.x jobs API and will not load on an older runtime.
 
 ## Install
 
